@@ -51,19 +51,21 @@ class Rotor:
 class RotorList:
     def __init__(self):
         self.output = 0
-        self.rot_num_pos = {}
+        self.rot_num_pos = {}  # rot num, pos
         self.rot_obj = []
-        self.rot_pos = []
+        self.rot_pos = []  # creat onl one ist
         self.rev_rots = []
 
         # input num, run click till num
 
     def rand_rot_ass(self):
-        self.rot_pos = random.sample(range(0, 26), 3)
+        num = random.sample(range(0, 5), 3)
+        pos = random.sample(range(0, 26), 3)
+        self.rot_num_pos[num] = pos
 
     def mir(self):  # click before?
-        for rot in self.rot_pos:
-            rev_ls = [pair.reversed() for pair in rot]
+        for rot in self.rot_obj:
+            rev_ls = [pair.reversed() for pair in rot.rot_ls]
             self.rev_rots.append(rev_ls)
         pass
 
@@ -79,13 +81,13 @@ class RotorList:
         while True:
             self.rot_pos[x] = (self.rot_pos[x] + 1) % 26
             self.rot_obj[x].rot()  # witch
-            if self.rot_pos[x] == 0:  # do befor break, save n
-                x = (x + 1) % len(self.rot_pos)
-            else:
+            if self.rot_pos[x] != 0:
                 break
+            x = (x + 1) % len(self.rot_pos)
 
     def run_rot(self, inp):
         self.rot_scram(inp)
+        # self.output += 1
         self.mir()
         self.rot_scram(self.output)
         self.click()
@@ -95,50 +97,79 @@ class RotorList:
         #     pass
         for n, pos in (self.rot_num_pos.items()):
             r = Rotor(n, pos)  # numper of each rot
-            # r.pos = y for y in r_pos: thus r_pos holds current, rot hold init
+
             self.rot_obj.append(r)   # have each do itself?
 
-    def ret_rot(self): # or file
+    def ret_rot(self):  # or file
         pass
 
 
 class PlugBoard:
     def __init__(self):
-        self.plug_l = {}
         self.plugs = []
-        self.plug_rev = []  # temp can rep by rexex
         # save plug init
 
     def swap(self, let):
-        let = self.plug_l[let][1]  # keyvalue pair, pair ten, then apeend rev of paired ten
+        let = self.plugs[let][1]
         return let
 
-    def s_string(self, st):  # idea if whole str
-        for x, y in self.plugs:
-            st.replace(x, y).replace(y, x)
+    def create_pairs(self):
+        self.plugs = np.random.choice(range(26), size=(10, 2), replace=False)
 
-    def create_pairs(self):  # ask user if creat random or presart
-        plug_r = range(26)
-        self.plug_l = np.random.choice(plug_r, size=(10, 2), replace=False)
-        self.plug_rev = [pair.reversed() for pair in self.plug_l]
+    def add_rev(self):
+        plug_rev = [pair.reversed() for pair in self.plugs]
+        self.plugs += plug_rev  # all in
+        self.plugs = sorted(self.plugs, key=lambda x: x[0])
 
 
 def enigma():
     # init rot
-    rot_board = RotorList()
     rot_choice = list(input('Rotor xyz from 1-5; i.e. (234): '))
     plug_choice = list(input('rot(234): '))
-    if len(rot_choice) == 0:  # class(rot_list); def in_rot  runs after init and ifelse here does rot setup
-        # in rots:  first init then if choices assin val else creat and ret
+    if len(rot_choice) == 0:
         rot_board.rand_rot_ass()  # rand num
         pass
     else:
-        rot_start = input('Rotor start local from 0-25; i.e. (23,5,4): ').replace(' ','').split(',')
+        rot_start = input('Rotor start local from 0-25; i.e. (23,5,4): ').replace(' ', '').split(',')
         if len(rot_start) == 0:
             pass  # do what
-        rot_board.in_rot_ls = rot_start  # what about rot num
-    if len(plug_choice):
-        pass
+        rot_board.rot_num_pos = dict(zip(rot_choice, rot_start))
+    rot_board.rot_init()
 
+    # in plug
+    if len(plug_choice) == 0:
+        plugs.create_pairs()
+    else:
+        pl = input('Rotor start local from 0-25; i.e. (23,5,4): ').replace(' ', '').split(',')  # fix pairs
+        plugs.plugs = pl
+    plugs.add_rev()
+
+
+def let_con(let):
+    pass
+
+
+def on_let(let):
+    # run plug
+    let = plugs.swap(let)
+    rot_board.run_rot(let)
+    out_let = rot_board.output
+    return plugs.swap(out_let)
+
+
+def string_decode(st):
+    n_lets = [on_let(let) for let in st]
+    return n_lets
+
+
+rot_board = RotorList()  # fix
+plugs = PlugBoard()
+
+# decode
 string = input('code str:')
-for s in string:
+"""if st>0
+ string
+ else let,
+ run till escape
+
+# for s in string:"""
