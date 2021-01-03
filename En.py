@@ -4,15 +4,14 @@ import numpy as np
 file = '' # file stored rots
 
 
-def read_rot():  # multi rot
-    with open(file) as f:
-        rot_line = f.readlines()
-    return rot_line
-
-
 class Rotor:
-    def __init__(self):
-        self.rot_li = []
+    def __init__(self, num, pos):
+        self.rot_li_in = []
+        self.rot_li = []  # click from after init
+        self.num = num  # if 0 fo x
+        self.pos = pos
+
+        self.rot(pos)
         # self.incon = incon
 
     def rot(self, cl=1):
@@ -29,37 +28,47 @@ class Rotor:
         lis = range(0, 25)
         random.shuffle(lis)
         self.rot_li = [(num, y) for num, y in enumerate(lis)]
+        self.save_rot()
         # todo save to file, return
+
+    def read_rot(self):  # multi rot
+
+        """try:
+        read file[num].lines
+        else:
+        create"""
+        with open(file) as f:
+            rot_line = f.readlines()
+        self.rot_li = rot_line
+
+    def save_rot(self):
+        """dict = {num: list}
+        pandas.to_csv. append list
+        """
+        pass  # pand
 
 
 class RotorList:
-    def __init__(self, rotor_list):
-        if len(rotor_list) == 0:
-            pass
-            # init_rotor()
-        else:
-            pass
-        self.output = ''
-        self.in_rot_ls = []
+    def __init__(self):
+        self.output = 0
+        self.rot_num_pos = {}
         self.rot_obj = []
-        self.rot_list = self.in_rot_ls
+        self.rot_pos = []
         self.rev_rots = []
-        self.rot_num = []
-        for x in range(len(self.rot_list)):
-             self.rot_obj.append(Rotor())   # have each do itself?
+
         # input num, run click till num
 
     def rand_rot_ass(self):
-        self.in_rot_ls = random.sample(range(0,26), 3)
+        self.rot_pos = random.sample(range(0, 26), 3)
 
     def mir(self):  # click before?
-        for rot in self.rot_list:
+        for rot in self.rot_pos:
             rev_ls = [pair.reversed() for pair in rot]
             self.rev_rots.append(rev_ls)
         pass
 
     def rot_scram(self, inp):
-        sl = [sorted(r, key=lambda x: x[0]) for r in self.rot_list]  # , sorted(r2), sorted(r3)  # keys
+        sl = [sorted(r.rot_ls, key=lambda x: x[0]) for r in self.rot_obj]  # , sorted(r2), sorted(r3)  # keys
         for ro in sl:
             inp = ro[inp][1]  # second val from imp
         self.output = inp
@@ -68,10 +77,10 @@ class RotorList:
         x = 0
         # for r in self.rot_num:
         while True:
-            self.rot_list[x] = (self.rot_list[x] + 1) % 26
+            self.rot_pos[x] = (self.rot_pos[x] + 1) % 26
             self.rot_obj[x].rot()  # witch
-            if self.rot_list[x] == 0:  # do befor break, save n
-                x = (x + 1) % len(self.rot_list)
+            if self.rot_pos[x] == 0:  # do befor break, save n
+                x = (x + 1) % len(self.rot_pos)
             else:
                 break
 
@@ -81,7 +90,15 @@ class RotorList:
         self.rot_scram(self.output)
         self.click()
 
-    def grab_rot(self): # or file
+    def rot_init(self):
+        # if len(self.rot_num) == 0:  # nothing added, do l hear
+        #     pass
+        for n, pos in (self.rot_num_pos.items()):
+            r = Rotor(n, pos)  # numper of each rot
+            # r.pos = y for y in r_pos: thus r_pos holds current, rot hold init
+            self.rot_obj.append(r)   # have each do itself?
+
+    def ret_rot(self): # or file
         pass
 
 
@@ -106,21 +123,22 @@ class PlugBoard:
         self.plug_rev = [pair.reversed() for pair in self.plug_l]
 
 
-# init rot
-rot_board = RotorList()
-rot_choice = list(input('Rotor xyz from 1-5; i.e. (234): '))
-plug_choice = list(input('rot(234): '))
-if len(rot_choice) == 0:  # class(rot_list); def in_rot  runs after init and ifelse here does rot setup
-    # in rots:  first init then if choices assin val else creat and ret
-    rot_board.rand_rot_ass()
-    pass
-else:
-    rot_start = input('Rotor start local from 0-25; i.e. (23,5,4): ').replace(' ','').split(',')
-    if len(rot_start) == 0:
-        pass  # do what
-    rot_board.in_rot_ls = rot_start  # what about rot num
-if len(plug_choice):
-    pass
+def enigma():
+    # init rot
+    rot_board = RotorList()
+    rot_choice = list(input('Rotor xyz from 1-5; i.e. (234): '))
+    plug_choice = list(input('rot(234): '))
+    if len(rot_choice) == 0:  # class(rot_list); def in_rot  runs after init and ifelse here does rot setup
+        # in rots:  first init then if choices assin val else creat and ret
+        rot_board.rand_rot_ass()  # rand num
+        pass
+    else:
+        rot_start = input('Rotor start local from 0-25; i.e. (23,5,4): ').replace(' ','').split(',')
+        if len(rot_start) == 0:
+            pass  # do what
+        rot_board.in_rot_ls = rot_start  # what about rot num
+    if len(plug_choice):
+        pass
 
 string = input('code str:')
 for s in string:
